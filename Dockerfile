@@ -1,12 +1,12 @@
 ####################################################################
-# Imagem Original
+# Original Image
 ####################################################################
 
 # This image can be changed to a simpler one:
 FROM python:3.6
 
 ####################################################################
-# Documentação
+# Documentation
 ####################################################################
 
 # You can change this:
@@ -35,7 +35,7 @@ RUN pip install -I scipy==1.1.0                                 && \
     pip install sphinxcontrib-bibtex                            
 
 ####################################################################
-# Adicionando o Código Fonte
+# Adding Source Code to the Docker
 ####################################################################
 
 # Para quando estiver em produção e não precisar mais montar volume:
@@ -43,7 +43,7 @@ RUN pip install -I scipy==1.1.0                                 && \
 # COPY . /lifetimes
 
 ####################################################################
-# Comandos Iniciais
+# Initial Commands
 ####################################################################
 
 # `pip install -e .` installs your local version of the library
