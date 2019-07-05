@@ -91,8 +91,10 @@ def load_transaction_data(
     DataFrame
     """
 
-    if 'filename' not in kwargs.keys():
+    if 'filename' not in kwargs.keys() or kwargs['filename'] == None:
         filename = 'example_transactions.csv'
+        if 'filename' in kwargs.keys():
+            del kwargs['filename']
     else:
         filename = kwargs['filename']
         del kwargs['filename']
