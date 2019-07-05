@@ -21,6 +21,7 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+# In order to build the Docs use: `sphinx-build -b html "docs/" "docs/_build"`
 import sphinx_rtd_theme
 
 html_theme = "sphinx_rtd_theme"
