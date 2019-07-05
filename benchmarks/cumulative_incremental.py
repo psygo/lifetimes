@@ -1,4 +1,8 @@
+####################################################################
 # Imports
+####################################################################
+
+import sys
 
 import lifetimes
 from lifetimes.datasets import load_transaction_data
@@ -16,11 +20,16 @@ import seaborn as sns
 sns.set()
 
 ####################################################################
+# Terminal Variables
+####################################################################
+
+filename = sys.argv[1] if len(sys.argv) == 2 else None
+# filename = 'CDNOW_master.csv' # 'CDNOW_master.csv' or None
+
+####################################################################
 # Loading the Data
 ####################################################################
 
-# This function uses the `example_transactions.csv` file currently.
-filename = 'CDNOW_master.csv' # 'CDNOW_master.csv' or None
 transaction_data = load_transaction_data(filename = filename)
 
 if filename == 'CDNOW_master.csv':
@@ -124,4 +133,27 @@ plt.ylabel('# of transactions')
 plt.title('Transactions by Date from the Original Data')
 plt.xticks(rotation = 90)
 plt.savefig(plot_path + 'grouped_transactions' + img_type)
+plt.close()
+
+####################################################################
+# Tiny Report on the prob_alive
+####################################################################
+
+summary_cal_holdout['prob_alive'] = summary_cal_holdout.apply(lambda x : float(bgf.conditional_probability_alive(
+                                                                                   frequency = x.loc['frequency_cal'],
+                                                                                   recency   = x.loc['recency_cal'],
+                                                                                   T         = x.loc['T_cal']
+                                                                               )
+                                                                         ), axis = 1
+                                                        )
+
+total_num_customers = int(summary_cal_holdout['prob_alive'].sum())
+
+print(f'O total de clientes existentes para esse período é de: {summary_cal_holdout.shape[0]}')
+print(f'O Total Efetivo de Clientes é de aproximadamente: {total_num_customers}')
+
+plt.hist(summary_cal_holdout['prob_alive'].values, bins = 100)
+plt.title('Histogram of the Probability of a Customer Being Alive')
+plt.xlabel('probability of being alive')
+plt.savefig(plot_path + 'prob_alive' + img_type)
 plt.close()
