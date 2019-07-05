@@ -119,39 +119,39 @@ summary = summary_data_from_transaction_data(
 
 print(summary.head())
 
-#%%
+# #%%
 
-####################################################################
-# Extra: Cumulative Plot
-####################################################################
+# ####################################################################
+# # Extra: Cumulative Plot
+# ####################################################################
 
-from lifetimes.plotting import plot_cumulative_transactions
+# from lifetimes.plotting import plot_cumulative_transactions
 
-plot_cumulative_transactions(
-    model = bgf,
-    transactions = transaction_data,
-    datetime_col = 'date',
-    customer_id_col = 'id',
-    t = 200,
-    t_cal = 100
-)
+# plot_cumulative_transactions(
+#     model = bgf,
+#     transactions = transaction_data,
+#     datetime_col = 'date',
+#     customer_id_col = 'id',
+#     t = 200,
+#     t_cal = 100
+# )
 
-#%%
+# #%%
 
-####################################################################
-# Extra: Incremental Plot
-####################################################################
+# ####################################################################
+# # Extra: Incremental Plot
+# ####################################################################
 
-from lifetimes.plotting import plot_incremental_transactions
+# from lifetimes.plotting import plot_incremental_transactions
 
-plot_incremental_transactions(
-    model = bgf,
-    transactions = transaction_data,
-    datetime_col = 'date',
-    customer_id_col = 'id',
-    t = 200,
-    t_cal = 100
-)
+# plot_incremental_transactions(
+#     model = bgf,
+#     transactions = transaction_data,
+#     datetime_col = 'date',
+#     customer_id_col = 'id',
+#     t = 200,
+#     t_cal = 100
+# )
 
 #%%
 

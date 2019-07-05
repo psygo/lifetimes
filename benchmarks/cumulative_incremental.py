@@ -2,8 +2,12 @@
 
 import lifetimes
 from lifetimes.datasets import load_transaction_data
-from lifetimes.plotting import plot_cumulative_transactions
-from lifetimes.plotting import plot_incremental_transactions
+from lifetimes.plotting import (
+    plot_cumulative_transactions,
+    plot_incremental_transactions,
+    plot_period_transactions,
+    plot_calibration_purchases_vs_holdout_purchases
+)
 
 import pandas as pd
 
@@ -35,6 +39,9 @@ summary_cal_holdout = lifetimes.utils.calibration_and_holdout_data(
     observation_period_end = observation_period_end
 )
 
+print('Transaction Data Shape:', transaction_data.shape)
+print('Cal-Holdout Shape:', summary_cal_holdout.shape)
+
 ####################################################################
 # Fitting the Model
 ####################################################################
@@ -58,7 +65,7 @@ print(bgf.summary)
 t = 300
 t_cal = (pd.to_datetime(calibration_period_end) - beginning).days
 
-plot_path = 'benchmarks/'
+plot_path = 'benchmarks/images/'
 
 plot_cumulative_transactions(
     model           = bgf,
@@ -80,4 +87,17 @@ plot_incremental_transactions(
     t_cal           = t_cal
 )
 plt.savefig(plot_path + 'incremental.svg')
+plt.close()
+
+plot_period_transactions(
+    model = bgf
+)
+plt.savefig(plot_path + 'period.svg')
+plt.close()
+
+plot_calibration_purchases_vs_holdout_purchases(
+    model = bgf, 
+    calibration_holdout_matrix = summary_cal_holdout
+)
+plt.savefig(plot_path + 'calibration_vs_holdout_purchases.svg')
 plt.close()
