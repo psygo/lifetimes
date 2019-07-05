@@ -14,18 +14,25 @@ import matplotlib.pyplot as plt
 ####################################################################
 
 # This function uses the `example_transactions.csv` file currently.
-transaction_data = load_transaction_data()
+filename = 'CDNOW_master.csv'
+transaction_data = load_transaction_data(filename = filename)
+
+if filename == 'CDNOW_master.csv':
+    transaction_data = transaction_data[['customer_id', 'date', 'number_of_cds', 'dollar_value']]
+    transaction_data['date'] = transaction_data['date'].astype(str)
+    transaction_data['date'] = transaction_data['date'].apply(lambda x : x[0:4] + '-' + x[4:6] + '-' + x[6:8])
+    transaction_data['date'] = pd.to_datetime(transaction_data['date'])
 
 beginning = pd.to_datetime(transaction_data['date'].min())
-calibration_period_end = '2014-09-01'
-observation_period_end = '2014-12-31'
+calibration_period_end = '1997-09-01' # '2014-09-01'
+observation_period_end = '1997-12-31' # '2014-12-31'
 
 summary_cal_holdout = lifetimes.utils.calibration_and_holdout_data(
     transactions           = transaction_data, 
-    customer_id_col        = 'id', 
+    customer_id_col        = 'customer_id' if filename == 'CDNOW_master.csv' else 'id', 
     datetime_col           = 'date',
-    calibration_period_end = '2014-09-01',
-    observation_period_end = '2014-12-31'
+    calibration_period_end = calibration_period_end,
+    observation_period_end = observation_period_end
 )
 
 ####################################################################
@@ -57,7 +64,7 @@ plot_cumulative_transactions(
     model           = bgf,
     transactions    = transaction_data,
     datetime_col    = 'date',
-    customer_id_col = 'id',
+    customer_id_col = 'customer_id' if filename == 'CDNOW_master.csv' else 'id',
     t               = t,
     t_cal           = t_cal
 )
@@ -68,7 +75,7 @@ plot_incremental_transactions(
     model           = bgf,
     transactions    = transaction_data,
     datetime_col    = 'date',
-    customer_id_col = 'id',
+    customer_id_col = 'customer_id' if filename == 'CDNOW_master.csv' else 'id',
     t               = t,
     t_cal           = t_cal
 )
