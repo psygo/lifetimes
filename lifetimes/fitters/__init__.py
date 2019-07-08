@@ -98,7 +98,12 @@ class BaseFitter(object):
     def _compute_variance_matrix(
         self
     ):
+        """
+        Computes the Variance Matrix.
+        """
+
         params_ = self.params_
+
         return pd.DataFrame(
             (params_ ** 2).values * np.linalg.inv(self._hessian_) / self.data["weights"].sum(),
             columns=params_.index,
@@ -109,7 +114,7 @@ class BaseFitter(object):
         self
     ):
         """
-        Computes the Standard Errors
+        Computes the Standard Errors.
         """
 
         return np.sqrt(pd.Series(np.diag(self.variance_matrix_.values), index=self.params_.index))
@@ -118,10 +123,10 @@ class BaseFitter(object):
         self
     ):
         """
-        Computes the confidence intervals.
+        Computes the confidence intervals, at 95% confidence.
         """
 
-        inv_cdf_at_5_confidence = 1.96
+        inv_cdf_at_5_confidence = 1.96 # 95% confidence
 
         return pd.DataFrame(
             {
@@ -142,13 +147,34 @@ class BaseFitter(object):
         **kwargs
     ):
         """
-        Fits the model usind ``scipy.optimize`` ``minimize`` function.
+        Fits the model using ``scipy.optimize`` ``minimize()`` function.
         """
 
         # set options for minimize, if specified in kwargs will be overwritten
         minimize_options = {}
         minimize_options["disp"] = disp
         minimize_options.update(kwargs)
+
+        self.solution_iter = []
+        def callback_solution_saver(
+            xk
+        ):
+            """
+            Instantiated inside ``scipy.optimize`` ``minimize()`` call 
+            inside the ``_fit()`` method.
+
+            Saves the solution at the fitter's ``solution_iter`` property.
+
+            Note that neither ``exp()`` nor scaling to ``alpha`` are applied here.
+            For those operations, use the ``solution_iter_summary`` property.
+
+            Parameters
+            ----------
+            xk : array-like
+                Solution at the current iteration.
+            """
+
+            self.solution_iter.append(xk.tolist())
 
         current_init_params = 0.1 * np.ones(params_size) if initial_params is None else initial_params
         output = minimize(
@@ -160,11 +186,17 @@ class BaseFitter(object):
             args=minimizing_function_args,
             options=minimize_options,
             bounds=bounds,
+            callback=callback_solution_saver
         )
+
         if output.success:
             hessian_ = hessian(self._negative_log_likelihood)(output.x, *minimizing_function_args)
+            self.nit = output.nit # Number of Iterations performed
+            
             return output.x, output.fun, hessian_
-        print(output)
+
+        # print(output)
+        
         raise ConvergenceError(
             dedent(
                 """
@@ -196,4 +228,36 @@ class BaseFitter(object):
         df["lower 95% bound"] = self.confidence_intervals_["lower 95% bound"]
         df["upper 95% bound"] = self.confidence_intervals_["upper 95% bound"]
         
+        return df
+
+    @property
+    def ll_summary(
+        self
+    ):
+        """
+        Log-Likelihood data for convergence evaluations.
+        """
+
+        ll_summary = {
+            'neg_log_likelihood' : [self._negative_log_likelihood_],
+            'num_it'             : [self.nit]
+        }
+
+        df = pd.DataFrame(ll_summary)
+
+        return df
+
+    @property
+    def solution_iter_summary(
+        self
+    ):
+        """
+        Essentially a wrapper for the Iterative Solutions (``self.solutions_iter``).
+        """
+
+        df = pd.DataFrame(self.solution_iter, columns = self.params_names)
+
+        df = np.exp(df)
+        df["alpha"] /= self._scale
+
         return df
