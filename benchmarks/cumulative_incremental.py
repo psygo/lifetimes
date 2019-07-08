@@ -139,13 +139,13 @@ plt.close()
 # Tiny Report on the prob_alive
 ####################################################################
 
-summary_cal_holdout['prob_alive'] = summary_cal_holdout.apply(lambda x : float(bgf.conditional_probability_alive(
-                                                                                   frequency = x.loc['frequency_cal'],
-                                                                                   recency   = x.loc['recency_cal'],
-                                                                                   T         = x.loc['T_cal']
-                                                                               )
-                                                                         ), axis = 1
-                                                        )
+summary_cal_holdout['prob_alive'] = summary_cal_holdout.apply(
+    lambda x : float(bgf.conditional_probability_alive(
+        frequency = x.loc['frequency_cal'],
+        recency   = x.loc['recency_cal'],
+        T         = x.loc['T_cal']
+    )), axis = 1
+)
 
 total_num_customers = int(summary_cal_holdout['prob_alive'].sum())
 
