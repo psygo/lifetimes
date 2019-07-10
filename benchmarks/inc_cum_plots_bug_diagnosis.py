@@ -73,11 +73,11 @@ transaction_data['date'] = pd.to_datetime(transaction_data['date'])
 
 beginning = pd.to_datetime(transaction_data['date'].min())
 
-print(
+print('Initial Date: {}\nLast Date:{}\nNumber of days: {}'.format(
     transaction_data['date'].min(), 
     transaction_data['date'].max(),
     transaction_data['date'].max() - transaction_data['date'].min()
-)
+))
 print('')
 
 ####################################################################
