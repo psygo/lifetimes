@@ -180,6 +180,90 @@ plt.savefig(plot_path + 'incremental_old' + img_type)
 plt.close()
 
 ####################################################################
+# Local Version of the Cumulative Transactions
+####################################################################
+
+def plot_cumulative_transactions(
+    model,
+    transactions,
+    calibration_period_end,
+    datetime_col,
+    customer_id_col,
+    t,
+    t_cal,
+    datetime_format=None,
+    freq="D",
+    set_index_date=False,
+    title="Tracking Cumulative Transactions",
+    xlabel="day",
+    ylabel="Cumulative Transactions",
+    legend=['actual', 'model on all data', 'model on calibration data'],
+    ax=None,
+    **kwargs
+):
+
+    from matplotlib import pyplot as plt
+
+    if ax is None:
+        ax = plt.subplot(111)
+
+    # Using only the purchases on the calibration period:
+    holdout_transactions = transactions[transactions['date'] > calibration_period_end]
+    cal_transactions = transactions[transactions['date'] <= calibration_period_end]
+
+    df_cum_transactions = expected_cumulative_transactions(
+        model,
+        transactions,
+        datetime_col,
+        customer_id_col,
+        t,
+        datetime_format=datetime_format,
+        freq=freq,
+        set_index_date=set_index_date,
+    )
+
+    df_cum_transactions_cal = expected_cumulative_transactions(
+        model,
+        cal_transactions,
+        datetime_col,
+        customer_id_col,
+        t,
+        datetime_format=datetime_format,
+        freq=freq,
+        set_index_date=set_index_date,
+    )
+
+    df_cum_transactions.plot(ax=ax, title=title, color=['royalblue', 'orange'], **kwargs)
+    df_cum_transactions_cal['predicted'].plot(ax=ax, title=title, color=['red'], **kwargs)
+
+    if set_index_date:
+        x_vline = df_cum_transactions.index[int(t_cal)]
+        xlabel = "date"
+    else:
+        x_vline = t_cal
+    ax.axvline(x=x_vline, color="r", linestyle="--")
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+
+    ax.legend(legend, loc = 'upper left')
+
+    return ax
+
+# New plot call:
+
+plot_cumulative_transactions(
+    model                  = bgf,
+    transactions           = transaction_data,
+    calibration_period_end = calibration_period_end,
+    datetime_col           = 'date',
+    customer_id_col        = 'customer_id' if filename == 'CDNOW_master.csv' else 'id',
+    t                      = t,
+    t_cal                  = t_cal
+)
+plt.savefig(plot_path + 'cumulative_new' + img_type)
+plt.close()
+
+####################################################################
 # Local Version of the Incremental Transactions
 ####################################################################
 
@@ -256,97 +340,13 @@ def plot_incremental_transactions(
 # New plot call:
 
 plot_incremental_transactions(
-    model           = bgf,
-    transactions    = transaction_data,
+    model                  = bgf,
+    transactions           = transaction_data,
     calibration_period_end = calibration_period_end,
-    datetime_col    = 'date',
-    customer_id_col = 'customer_id' if filename == 'CDNOW_master.csv' else 'id',
-    t               = t,
-    t_cal           = t_cal
+    datetime_col           = 'date',
+    customer_id_col        = 'customer_id' if filename == 'CDNOW_master.csv' else 'id',
+    t                      = t,
+    t_cal                  = t_cal
 )
 plt.savefig(plot_path + 'incremental_new' + img_type)
-plt.close()
-
-####################################################################
-# Local Version of the Cumulative Transactions
-####################################################################
-
-def plot_cumulative_transactions(
-    model,
-    transactions,
-    calibration_period_end,
-    datetime_col,
-    customer_id_col,
-    t,
-    t_cal,
-    datetime_format=None,
-    freq="D",
-    set_index_date=False,
-    title="Tracking Cumulative Transactions",
-    xlabel="day",
-    ylabel="Cumulative Transactions",
-    legend=['actual', 'model on all data', 'model on calibration data'],
-    ax=None,
-    **kwargs
-):
-
-    from matplotlib import pyplot as plt
-
-    if ax is None:
-        ax = plt.subplot(111)
-
-    # Using only the purchases on the calibration period:
-    holdout_transactions = transactions[transactions['date'] > calibration_period_end]
-    cal_transactions = transactions[transactions['date'] <= calibration_period_end]
-
-    df_cum_transactions = expected_cumulative_transactions(
-        model,
-        transactions,
-        datetime_col,
-        customer_id_col,
-        t,
-        datetime_format=datetime_format,
-        freq=freq,
-        set_index_date=set_index_date,
-    )
-
-    df_cum_transactions_cal = expected_cumulative_transactions(
-        model,
-        cal_transactions,
-        datetime_col,
-        customer_id_col,
-        t,
-        datetime_format=datetime_format,
-        freq=freq,
-        set_index_date=set_index_date,
-    )
-
-    df_cum_transactions.plot(ax=ax, title=title, color=['royalblue', 'orange'], **kwargs)
-    df_cum_transactions_cal['predicted'].plot(ax=ax, title=title, color=['red'], **kwargs)
-
-    if set_index_date:
-        x_vline = df_cum_transactions.index[int(t_cal)]
-        xlabel = "date"
-    else:
-        x_vline = t_cal
-    ax.axvline(x=x_vline, color="r", linestyle="--")
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-
-    ax.legend(legend, loc = 'upper left')
-
-    return ax
-
-# New plot call:
-
-plot_cumulative_transactions(
-    model           = bgf,
-    transactions    = transaction_data,
-    calibration_period_end = calibration_period_end,
-    datetime_col    = 'date',
-    customer_id_col = 'customer_id' if filename == 'CDNOW_master.csv' else 'id',
-    t               = t,
-    t_cal           = t_cal
-)
-plt.savefig(plot_path + 'cumulative_new' + img_type)
 plt.close()

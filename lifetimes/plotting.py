@@ -392,6 +392,7 @@ def plot_history_alive(model, t, transactions, datetime_col, freq="D", start_dat
 def plot_cumulative_transactions(
     model,
     transactions,
+    calibration_period_end,
     datetime_col,
     customer_id_col,
     t,
@@ -402,6 +403,7 @@ def plot_cumulative_transactions(
     title="Tracking Cumulative Transactions",
     xlabel="day",
     ylabel="Cumulative Transactions",
+    legend=['actual', 'model on all data', 'model on calibration data'],
     ax=None,
     **kwargs
 ):
@@ -414,6 +416,8 @@ def plot_cumulative_transactions(
         A fitted lifetimes model
     transactions: pandas DataFrame
         DataFrame containing the transactions history of the customer_id
+    calibration_period_end: str
+        string delimiting the end of the calibration period. Tested format: "YYYY-MM-DD"
     datetime_col: str
         The column in transactions that denotes the datetime the purchase was made.
     customer_id_col: str
@@ -438,6 +442,8 @@ def plot_cumulative_transactions(
         Figure xlabel
     ylabel: str, optional
         Figure ylabel
+    legend: list, optional
+        list of legend labels
     ax: matplotlib.AxesSubplot, optional
         Using user axes
     kwargs
@@ -446,12 +452,16 @@ def plot_cumulative_transactions(
     Returns
     -------
     axes: matplotlib.AxesSubplot
-
     """
+
     from matplotlib import pyplot as plt
 
     if ax is None:
         ax = plt.subplot(111)
+
+    # Using only the purchases on the calibration period:
+    holdout_transactions = transactions[transactions['date'] > calibration_period_end]
+    cal_transactions = transactions[transactions['date'] <= calibration_period_end]
 
     df_cum_transactions = expected_cumulative_transactions(
         model,
@@ -464,7 +474,19 @@ def plot_cumulative_transactions(
         set_index_date=set_index_date,
     )
 
-    ax = df_cum_transactions.plot(ax=ax, title=title, **kwargs)
+    df_cum_transactions_cal = expected_cumulative_transactions(
+        model,
+        cal_transactions,
+        datetime_col,
+        customer_id_col,
+        t,
+        datetime_format=datetime_format,
+        freq=freq,
+        set_index_date=set_index_date,
+    )
+
+    df_cum_transactions.plot(ax=ax, title=title, color=['royalblue', 'orange'], **kwargs)
+    df_cum_transactions_cal['predicted'].plot(ax=ax, title=title, color=['red'], **kwargs)
 
     if set_index_date:
         x_vline = df_cum_transactions.index[int(t_cal)]
@@ -474,12 +496,16 @@ def plot_cumulative_transactions(
     ax.axvline(x=x_vline, color="r", linestyle="--")
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
+
+    ax.legend(legend, loc = 'upper left')
+
     return ax
 
 
 def plot_incremental_transactions(
     model,
     transactions,
+    calibration_period_end,
     datetime_col,
     customer_id_col,
     t,
@@ -490,6 +516,7 @@ def plot_incremental_transactions(
     title="Tracking Daily Transactions",
     xlabel="day",
     ylabel="Transactions",
+    legend=['actual', 'model on all data', 'model on calibration data'],
     ax=None,
     **kwargs
 ):
@@ -502,6 +529,8 @@ def plot_incremental_transactions(
         A fitted lifetimes model
     transactions: pandas DataFrame
         DataFrame containing the transactions history of the customer_id
+    calibration_period_end: str
+        string delimiting the end of the calibration period. Tested format: "YYYY-MM-DD"
     datetime_col: str
         The column in transactions that denotes the datetime the purchase was made.
     customer_id_col: str
@@ -526,6 +555,8 @@ def plot_incremental_transactions(
         Figure xlabel
     ylabel: str, optional
         Figure ylabel
+    legend: list, optional
+        list of legend labels
     ax: matplotlib.AxesSubplot, optional
         Using user axes
     kwargs
@@ -534,12 +565,16 @@ def plot_incremental_transactions(
     Returns
     -------
     axes: matplotlib.AxesSubplot
-
     """
+
     from matplotlib import pyplot as plt
 
     if ax is None:
         ax = plt.subplot(111)
+
+    # Using only the purchases on the calibration period:
+    holdout_transactions = transactions[transactions['date'] > calibration_period_end]
+    cal_transactions = transactions[transactions['date'] <= calibration_period_end]
 
     df_cum_transactions = expected_cumulative_transactions(
         model,
@@ -552,20 +587,36 @@ def plot_incremental_transactions(
         set_index_date=set_index_date,
     )
 
+    df_cum_transactions_cal = expected_cumulative_transactions(
+        model,
+        cal_transactions,
+        datetime_col,
+        customer_id_col,
+        t,
+        datetime_format=datetime_format,
+        freq=freq,
+        set_index_date=set_index_date,
+    )
+
     # get incremental from cumulative transactions
-    df_cum_transactions = df_cum_transactions.apply(lambda x: x - x.shift(1))
-    ax = df_cum_transactions.plot(ax=ax, title=title, **kwargs)
+    df_inc_transactions = df_cum_transactions.apply(lambda x: x - x.shift(1))
+    df_inc_transactions_cal = df_cum_transactions_cal.apply(lambda x: x - x.shift(1))
+
+    df_inc_transactions.plot(ax=ax, title=title, color=['royalblue', 'orange'], **kwargs)
+    df_inc_transactions_cal['predicted'].plot(ax=ax, title=title, color=['red'], **kwargs)
 
     if set_index_date:
-        x_vline = df_cum_transactions.index[int(t_cal)]
+        x_vline = df_inc_transactions.index[int(t_cal)]
         xlabel = "date"
     else:
         x_vline = t_cal
     ax.axvline(x=x_vline, color="r", linestyle="--")
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    return ax
 
+    ax.legend(legend, loc = 'upper left')
+
+    return ax
 
 def plot_transaction_rate_heterogeneity(
     model,
