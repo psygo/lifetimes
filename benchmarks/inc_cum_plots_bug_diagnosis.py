@@ -44,7 +44,7 @@ filename = sys.argv[1]
 penalizer_coef = float(sys.argv[2])
 
 # How to execute this (e.g.): 
-# `python benchmarks/forced_diagnosis.py CDNOW_master.csv 0.0`
+# `python benchmarks/inc_cum_plots_bug_diagnosis.py CDNOW_master.csv 0.0`
 
 ####################################################################
 # Loading the Data
@@ -157,27 +157,27 @@ img_type = '.svg'
 # Only used to prove that they were wrong. If you're on a version that
 # is already correct, don't bother to uncomment this.
 
-plot_cumulative_transactions(
-    model           = bgf,
-    transactions    = transaction_data,
-    datetime_col    = 'date',
-    customer_id_col = 'customer_id' if filename == 'CDNOW_master.csv' else 'id',
-    t               = t,
-    t_cal           = t_cal
-)
-plt.savefig(plot_path + 'cumulative_old' + img_type)
-plt.close()
+# plot_cumulative_transactions(
+#     model           = bgf,
+#     transactions    = transaction_data,
+#     datetime_col    = 'date',
+#     customer_id_col = 'customer_id' if filename == 'CDNOW_master.csv' else 'id',
+#     t               = t,
+#     t_cal           = t_cal
+# )
+# plt.savefig(plot_path + 'cumulative_old' + img_type)
+# plt.close()
 
-plot_incremental_transactions(
-    model           = bgf,
-    transactions    = transaction_data,
-    datetime_col    = 'date',
-    customer_id_col = 'customer_id' if filename == 'CDNOW_master.csv' else 'id',
-    t               = t,
-    t_cal           = t_cal
-)
-plt.savefig(plot_path + 'incremental_old' + img_type)
-plt.close()
+# plot_incremental_transactions(
+#     model           = bgf,
+#     transactions    = transaction_data,
+#     datetime_col    = 'date',
+#     customer_id_col = 'customer_id' if filename == 'CDNOW_master.csv' else 'id',
+#     t               = t,
+#     t_cal           = t_cal
+# )
+# plt.savefig(plot_path + 'incremental_old' + img_type)
+# plt.close()
 
 ####################################################################
 # Local Version of the Cumulative Transactions
