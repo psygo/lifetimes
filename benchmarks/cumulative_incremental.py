@@ -48,13 +48,42 @@ if filename == 'CDNOW_master.csv':
     calibration_period_end = '1997-09-01' 
     observation_period_end = '1997-12-31'
 else: # artificial default dataset
-    calibration_period_end = '2014-07-01'
+    calibration_period_end = '2014-08-01'
     observation_period_end = '2014-12-31'
 
 print(transaction_data.head())
 print('')
 
+transaction_data['date'] = pd.to_datetime(transaction_data['date'])
+
 beginning = pd.to_datetime(transaction_data['date'].min())
+
+print(
+    transaction_data['date'].min(), 
+    transaction_data['date'].max(),
+    transaction_data['date'].max() - transaction_data['date'].min()
+)
+print('')
+
+force = True
+if force == True:
+    # Forcing purchases on the holdout period to be next to zero:
+    saved_transaction_data = transaction_data
+    all_dates = saved_transaction_data['date']
+    transaction_data = transaction_data[transaction_data['date'] <= calibration_period_end]
+
+    for day in all_dates:
+        day = pd.to_datetime(day)
+        if day > pd.to_datetime(calibration_period_end):
+            id_col = 'customer_id' if filename == 'CDNOW_master.csv' else 'id'
+            # Adding just 1 purchase for 1 customer to keep the date in.
+            transaction_data = transaction_data.append(
+                {'date' : day, id_col : 9999},
+                ignore_index = True
+            ) 
+
+    print(transaction_data.tail())
+    print('')
 
 summary_cal_holdout = lifetimes.utils.calibration_and_holdout_data(
     transactions           = transaction_data, 
@@ -89,8 +118,13 @@ print('')
 # Plotting
 ####################################################################
 
-t = 300
+t = 365
 t_cal = (pd.to_datetime(calibration_period_end) - beginning).days
+
+print('t_cal', t_cal)
+print(calibration_period_end)
+print(observation_period_end)
+print('')
 
 plot_path = 'benchmarks/images/'
 img_type = '.svg'
@@ -159,8 +193,14 @@ summary_cal_holdout['prob_alive'] = summary_cal_holdout.apply(
 
 total_num_customers = int(summary_cal_holdout['prob_alive'].sum())
 
-print('O total de clientes existentes para esse período é de: \t {: ,}'.format(summary_cal_holdout.shape[0]))
-print('O Total Efetivo de Clientes é de aproximadamente: \t {: ,}'.format(total_num_customers))
+print('O total de clientes existentes para esse período é de: \t {: ,}'.format(
+    summary_cal_holdout.shape[0]
+    )
+)
+print('O Total Efetivo de Clientes é de aproximadamente: \t {: ,}'.format(
+    total_num_customers
+    )
+)
 print('')
 
 plt.hist(summary_cal_holdout['prob_alive'].values, bins = 100)
