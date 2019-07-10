@@ -19,12 +19,19 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set()
 
+print('')
+
 ####################################################################
 # Terminal Variables
 ####################################################################
 
+# Terminal Options:
+
+# 1. filename       : None or CDNOW_master
+# 2. penalizer_coef : None (0.0) or something.
+
 filename = sys.argv[1] if len(sys.argv) == 2 else None
-# filename = 'CDNOW_master.csv' # 'CDNOW_master.csv' or None
+penalizer_coef = sys.argv[2] if len(sys.argv) == 3 else 0.0
 
 ####################################################################
 # Loading the Data
@@ -40,10 +47,12 @@ if filename == 'CDNOW_master.csv':
 
     calibration_period_end = '1997-09-01' 
     observation_period_end = '1997-12-31'
-
-else:
+else: # artificial default dataset
     calibration_period_end = '2014-07-01'
     observation_period_end = '2014-12-31'
+
+print(transaction_data.head())
+print('')
 
 beginning = pd.to_datetime(transaction_data['date'].min())
 
@@ -56,7 +65,7 @@ summary_cal_holdout = lifetimes.utils.calibration_and_holdout_data(
 )
 
 print('Transaction Data Shape:', transaction_data.shape)
-print('Cal-Holdout Shape:', '\t', summary_cal_holdout.shape)
+print('Cal-Holdout Shape: \t {}'.format(summary_cal_holdout.shape))
 print('')
 
 ####################################################################
@@ -64,7 +73,7 @@ print('')
 ####################################################################
 
 bgf = lifetimes.BetaGeoFitter(
-    penalizer_coef = 0.0
+    penalizer_coef = penalizer_coef
 )
 
 bgf.fit(
@@ -73,7 +82,8 @@ bgf.fit(
     summary_cal_holdout['T_cal']
 )
 
-print(bgf.summary)
+print(bgf.summary.round(4))
+print('')
 
 ####################################################################
 # Plotting
@@ -149,8 +159,9 @@ summary_cal_holdout['prob_alive'] = summary_cal_holdout.apply(
 
 total_num_customers = int(summary_cal_holdout['prob_alive'].sum())
 
-print(f'O total de clientes existentes para esse período é de: {summary_cal_holdout.shape[0]}')
-print(f'O Total Efetivo de Clientes é de aproximadamente: {total_num_customers}')
+print('O total de clientes existentes para esse período é de: \t {: ,}'.format(summary_cal_holdout.shape[0]))
+print('O Total Efetivo de Clientes é de aproximadamente: \t {: ,}'.format(total_num_customers))
+print('')
 
 plt.hist(summary_cal_holdout['prob_alive'].values, bins = 100)
 plt.title('Histogram of the Probability of a Customer Being Alive')

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Loads benchmarked datasets."""
 # modified from https://github.com/CamDavidsonPilon/lifelines/
 
 import pandas as pd
