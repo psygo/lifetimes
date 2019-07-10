@@ -330,8 +330,7 @@ class BetaGeoFitter(BaseFitter):
         """
         Calculate the expected number of repeat purchases up to time t.
 
-        Calculate repeat purchases for a randomly chosen individual from the
-        population.
+        Calculate repeat purchases for the whole population up to time ``t``.
 
         Equivalent to equation (9) of [2]_.
 

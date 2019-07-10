@@ -495,7 +495,7 @@ def expected_cumulative_transactions(
     Get expected and actual repeated cumulative transactions.
 
     Uses the ``expected_number_of_purchases_up_to_time()`` method from the fitted model
-    to predict the number of purchases.
+    to predict the cumulative number of purchases.
 
     Parameters
     ----------
